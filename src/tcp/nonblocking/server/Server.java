@@ -128,7 +128,7 @@ public class Server {
 		System.out.println("ON FERME LE CLIENT " + sc.getRemoteAddress());
 		sc.close();
 	    }
-	    key.interestOps(SelectionKey.OP_READ);
+	    key.interestOps(newInterestOps);
 	}
 	
 	void fullFill() {
