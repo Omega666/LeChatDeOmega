@@ -38,7 +38,7 @@ public class Server {
 	int updateInterestOps() {
 	    int newInterestOps =0;
 	    System.out.println();
-	    if(out.position()!=0 || !bqPacket.isEmpty()) {
+	    if(/*out.position()!=0 || */!bqPacket.isEmpty()) {
 		newInterestOps |= SelectionKey.OP_WRITE;
 		System.out.println("Write mode pour la clef" + Name);
 	    }
@@ -111,11 +111,11 @@ public class Server {
 	}
 
 	void doWrite() throws IOException {
-	    /*ByteBuffer packetBB = bqPacket.poll();
+	    ByteBuffer packetBB = bqPacket.poll();
 	    
 	    packetBB.flip();
-	    out.put(packetBB);*/
-	    fullFill();
+	    out.put(packetBB);
+	    //fullFill();
 	    out.flip();
 	    sc.write(out);
 	    out.compact();
