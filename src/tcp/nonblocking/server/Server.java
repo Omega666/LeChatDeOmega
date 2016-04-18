@@ -8,15 +8,12 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import packetManagement.packetDecoder.MessagePacket;
 import packetManagement.packetDecoder.PacketDecoder;
 import packetManagement.packetFlag.PacketFlag;
 
@@ -114,10 +111,11 @@ public class Server {
 	}
 
 	void doWrite() throws IOException {
-	    ByteBuffer packetBB = bqPacket.poll();
+	    /*ByteBuffer packetBB = bqPacket.poll();
 	    
 	    packetBB.flip();
-	    out.put(packetBB);
+	    out.put(packetBB);*/
+	    fullFill();
 	    out.flip();
 	    sc.write(out);
 	    out.compact();
@@ -131,6 +129,17 @@ public class Server {
 		sc.close();
 	    }
 	    key.interestOps(SelectionKey.OP_READ);
+	}
+	
+	void fullFill() {
+	    ByteBuffer b = bqPacket.peek();
+	    b.flip();
+	    int capacityLeft = out.capacity() - out.limit();
+	    
+	    if(capacityLeft > b.remaining()) {
+		out.put(b);
+		bqPacket.poll();
+	    }
 	}
     }
 
