@@ -22,6 +22,7 @@ public class Server {
     private int cptkey = 0;
     class Context{
 	boolean isClosed = false;
+	boolean writeAll = false;
 	ByteBuffer bb = ByteBuffer.allocateDirect(1024);
 	ByteBuffer out = ByteBuffer.allocateDirect(1024);
 	BlockingQueue<ByteBuffer> bqPacket = new ArrayBlockingQueue<>(1000);
@@ -111,19 +112,20 @@ public class Server {
 	}
 
 	void doWrite() throws IOException {
-	    ByteBuffer packetBB = bqPacket.poll();
-	    
-	    packetBB.flip();
-	    out.put(packetBB);
-	    //fullFill();
+	    fullFill();
 	    out.flip();
+	    
+	    int remainingToWrite = out.remaining();
+	   
 	    sc.write(out);
+
 	    out.compact();
 
 	    int newInterestOps = updateInterestOps();
 	    System.out.println("InterestOps Value in the doWrite -> " + newInterestOps);
 	    System.out.println("position :" + out.position() + ", isClosed field :" + isClosed);
 	    System.out.println("bb hasRemaining :" + bb.hasRemaining());
+	 
 	    if(newInterestOps == 0) {
 		System.out.println("ON FERME LE CLIENT " + sc.getRemoteAddress());
 		sc.close();
@@ -134,12 +136,16 @@ public class Server {
 	void fullFill() {
 	    ByteBuffer b = bqPacket.peek();
 	    b.flip();
+	    out.flip();
 	    int capacityLeft = out.capacity() - out.limit();
-	    
-	    if(capacityLeft > b.remaining()) {
+	    System.out.println("capacityLeft:" + capacityLeft + " remaining: "+ b.remaining());
+	    if(capacityLeft >= b.remaining()) {
+		out.compact();
 		out.put(b);
 		bqPacket.poll();
 	    }
+	   
+	  
 	}
     }
 
